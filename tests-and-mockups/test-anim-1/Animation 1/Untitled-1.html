@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: sans-serif; background: #000; overflow-x: hidden; }
+
+  .prev-section {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+  }
+  .prev-section p { font-size: 1rem; color: #bbb; letter-spacing: 0.05em; }
+
+  .pin-wrap {
+    position: relative;
+    height: 300vh;
+  }
+  .pin-inner {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+  }
+
+  .text-left,
+  .text-right {
+    position: absolute;
+    top: 50%;
+    font-size: clamp(1.8rem, 3.2vw, 2.8rem);
+    font-weight: 700;
+    color: #c8c5db;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    will-change: transform, opacity;
+    z-index: 2;
+  }
+  .text-left  { left: 6vw;  transform: translateY(-50%); }
+  .text-right { right: 6vw; transform: translateY(-50%); }
+
+  .media-box {
+    width: 40vw;
+    max-width: 560px;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 4px;
+    will-change: transform;
+    z-index: 1;
+  }
+  .media-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .next-section {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+  }
+  .next-section p { font-size: 1rem; color: #bbb; letter-spacing: 0.05em; }
+</style>
+</head>
+<body>
+
+<section class="prev-section">
+  <p>Scroll down</p>
+</section>
+
+<div class="pin-wrap" id="pinWrap">
+  <div class="pin-inner">
+    <div class="text-left"  id="textLeft">One System.</div>
+
+    <div class="media-box" id="mediaBox">
+      <img
+        src="https://cdn.prod.website-files.com/5fb66f27ac4ca586233ee142/69e616eb5d702bb3ea97abb0_67d9215d73e0827454975d13_BG-ultra.webp"
+        alt="Port"
+      />
+    </div>
+
+    <div class="text-right" id="textRight">Total Visibility.</div>
+  </div>
+</div>
+
+<section class="next-section">
+  <p>Next section</p>
+</section>
+
+<script>
+  const pinWrap  = document.getElementById('pinWrap');
+  const textLeft = document.getElementById('textLeft');
+  const textRight= document.getElementById('textRight');
+  const mediaBox = document.getElementById('mediaBox');
+
+  /* --- tweakable values --- */
+  const MAX_SCALE   = 2.2;   /* final image scale          */
+  const TEXT_SHIFT  = 55;     /* vw each text slides out     */
+  const SCRUB_PAGES = 2;      /* extra viewport-heights of scroll */
+
+  function easeInOut(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
+  function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+  function lerp(a,b,t){ return a+(b-a)*t; }
+
+  function onScroll() {
+    const rect  = pinWrap.getBoundingClientRect();
+    const total = pinWrap.offsetHeight - window.innerHeight;
+    const t = easeInOut(clamp(-rect.top / total, 0, 1));
+
+    mediaBox.style.transform    = 'scale(' + lerp(1, MAX_SCALE, t) + ')';
+    mediaBox.style.borderRadius = lerp(4, 0, t) + 'px';
+
+    const sx = lerp(0, TEXT_SHIFT, t);
+    textLeft.style.transform  = 'translateY(-50%) translateX(-' + sx + 'vw)';
+    textRight.style.transform = 'translateY(-50%) translateX('  + sx + 'vw)';
+
+    const fade = clamp(t * 2, 0, 1);
+    textLeft.style.opacity  = 1 - fade;
+    textRight.style.opacity = 1 - fade;
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+</script>
+</body>
+</html>

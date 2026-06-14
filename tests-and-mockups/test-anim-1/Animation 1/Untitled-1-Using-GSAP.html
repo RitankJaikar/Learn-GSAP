@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: sans-serif; background: #000; overflow-x: hidden; }
+
+  .prev-section {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .prev-section p { font-size: 1rem; color: #555; letter-spacing: 0.05em; }
+
+  .pin-wrap {
+    position: relative;
+    height: 300vh;
+  }
+  .pin-inner {
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .text-left,
+  .text-right {
+    position: absolute;
+    top: 50%;
+    font-size: clamp(1.8rem, 3.2vw, 2.8rem);
+    font-weight: 700;
+    color: #c8c5db;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    z-index: 2;
+    transform: translateY(-50%);
+  }
+  .text-left  { left: 6vw; }
+  .text-right { right: 6vw; }
+
+  .media-box {
+    width: 40vw;
+    max-width: 560px;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 4px;
+    z-index: 1;
+  }
+  .media-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .next-section {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .next-section p { font-size: 1rem; color: #555; letter-spacing: 0.05em; }
+</style>
+</head>
+<body>
+
+<section class="prev-section">
+  <p>Scroll down</p>
+</section>
+
+<div class="pin-wrap" id="pinWrap">
+  <div class="pin-inner" id="pinInner">
+    <div class="text-left"  id="textLeft">One System.</div>
+    <div class="media-box"  id="mediaBox">
+      <img
+        src="https://cdn.prod.website-files.com/5fb66f27ac4ca586233ee142/69e616eb5d702bb3ea97abb0_67d9215d73e0827454975d13_BG-ultra.webp"
+        alt="Port"
+      />
+    </div>
+    <div class="text-right" id="textRight">Total Visibility.</div>
+  </div>
+</div>
+
+<section class="next-section">
+  <p>Next section</p>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+  gsap.registerPlugin(ScrollTrigger);
+
+  /* --- tweakable values --- */
+  const MAX_SCALE  = 2.2;   // final image scale
+  const TEXT_SHIFT = "55vw"; // how far each text slides out
+  const SCRUB      = 1.5;   // scrub smoothness (true = instant, number = lag)
+
+  const tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: "#pinWrap",
+      start: "top top",
+      end: "bottom bottom",
+      scrub: SCRUB,
+      pin: "#pinInner",
+    }
+  });
+
+  tl
+    .to("#mediaBox", {
+      scale: MAX_SCALE,
+      borderRadius: 0,
+      ease: "none",
+    }, 0)
+    .to("#textLeft", {
+      x: "-" + TEXT_SHIFT,
+      opacity: 0,
+      ease: "none",
+    }, 0)
+    .to("#textRight", {
+      x: TEXT_SHIFT,
+      opacity: 0,
+      ease: "none",
+    }, 0);
+</script>
+</body>
+</html>

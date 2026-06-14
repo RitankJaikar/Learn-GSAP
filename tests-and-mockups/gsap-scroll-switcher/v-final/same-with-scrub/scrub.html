@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GSAP Scrub Switcher Test</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <style>
+      /* Essential styles for pinning / masking layout */
+      .switcher-wrap {
+        height: 100vh;
+        position: sticky;
+        top: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: #0b0b0b;
+        color: #ffffff;
+      }
+
+      /* Container to keep text elements overlapping at the same grid spot */
+      .text-container {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr;
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .switcher-text-item {
+        grid-column: 1;
+        grid-row: 1;
+        font-size: 2.5rem;
+        font-weight: 700;
+      }
+
+      /* Line track container acting as a mask window */
+      .line-track {
+        position: relative;
+        width: 300px;
+        height: 4px;
+        background-color: #222;
+        overflow: hidden;
+      }
+
+      .switcher-line-item {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      ._1-color {
+        background-color: #3b82f6;
+      } /* Blue */
+      ._2-color {
+        background-color: #ef4444;
+      } /* Red */
+    </style>
+  </head>
+  <body class="bg-zinc-900 m-0">
+    <div
+      class="h-[80vh] flex items-center justify-center text-zinc-500 text-xl font-medium"
+    >
+      Scroll Down to Start Animation ↓
+    </div>
+
+    <div class="switcher-section relative h-[300vh]">
+      <div class="switcher-wrap">
+        <div class="line-track">
+          <div class="switcher-line-item _1 _1-color"></div>
+          <div class="switcher-line-item _2 _2-color"></div>
+        </div>
+
+        <div class="text-container">
+          <div class="switcher-text-item _1">01. Strategy is Foundation</div>
+          <div class="switcher-text-item _2">02. Identity is Expression</div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="h-[100vh] bg-zinc-950 flex items-center justify-center text-zinc-600 text-lg"
+    >
+      End of Section Frame
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+    <script>
+      gsap.registerPlugin(ScrollTrigger);
+
+      // Dom query node selections
+      const firstTexts = document.querySelectorAll(".switcher-text-item._1");
+      const secondTexts = document.querySelectorAll(".switcher-text-item._2");
+
+      const firstLine = document.querySelector(".switcher-line-item._1");
+      const secondLine = document.querySelector(".switcher-line-item._2");
+
+      // Set initial operational states instantly
+      gsap.set([firstTexts, secondTexts], { opacity: 0, y: 100 });
+      gsap.set([firstLine, secondLine], { x: "-100%" });
+
+      // Linear Timeline construct bound strictly to the user scroll progress bar
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: ".switcher-section",
+          start: "top top",
+          end: "bottom bottom",
+          scrub: true,
+          markers: true, // Visual helper guides on page edges
+        },
+      });
+
+      // Step 1: Animate State 1 Elements Into View
+      tl.to(firstTexts, { opacity: 1, y: 0, duration: 1 })
+        .to(firstLine, { x: "0%", duration: 1 }, "<") // "<" start at the same time as the previous animation
+
+        // Step 2: Push State 1 Out of View & Simultaneously Pull State 2 Into View
+        .to(firstTexts, { opacity: 0, y: -40, duration: 1, delay: 0.5 }) // delay preserves view-time
+        .to(firstLine, { x: "100%", duration: 1 }, "<")
+
+        .to(secondTexts, { opacity: 1, y: 0, duration: 1 }, "<")
+        .to(secondLine, { x: "0%", duration: 1 }, "<")
+
+        // Holds state 2 fixed visibly at the tail end of the scrollbar window
+        .to({}, { duration: 0.5 });
+
+      //Your timeline total duration = 1 + 1 + 0.5 + 1 + 1 + 1 + 0.5 = 6 units
+    </script>
+  </body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: sans-serif; background: #000; overflow-x: hidden; }
+
+  .spacer {
+    height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .spacer p { color: #aaa; font-size: 0.9rem; letter-spacing: 0.05em; }
+
+  .pin-wrap { position: relative; height: 400vh; }
+
+  .pin-stage {
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .card {
+    position: absolute;
+    width: 480px;
+    height: 600px;
+    border-radius: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 48px 40px;
+    transform-origin: bottom center;
+    will-change: transform;
+  }
+
+  .card-1 { background: #7ecec4; }
+  .card-2 { background: #f5d97e; }
+  .card-3 { background: #c9a0e8; }
+
+  .card-title {
+    font-size: 1.55rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: rgba(0,0,0,0.78);
+    text-align: center;
+  }
+  .card-body {
+    font-size: 0.85rem;
+    color: rgba(0,0,0,0.45);
+    text-align: center;
+    max-width: 300px;
+    line-height: 1.65;
+  }
+  .card-btn {
+    margin-top: 28px;
+    padding: 13px 34px;
+    background: #fff;
+    border: none;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: #222;
+  }
+</style>
+</head>
+<body>
+
+<div class="spacer"><p>Scroll down</p></div>
+
+<div class="pin-wrap" id="pinWrap">
+  <div class="pin-stage" id="stage">
+
+    <div class="card card-1" id="c1">
+      <div class="card-title">COURSES YOU NEED</div>
+      <div class="card-body">Navaro combines practical certification courses with shipping calculators, document checkers, and tracking</div>
+      <button class="card-btn">Learn more</button>
+    </div>
+
+    <div class="card card-2" id="c2">
+      <div class="card-title">TOOLS THAT HELP</div>
+      <div class="card-body">Navaro combines practical certification courses with shipping calculators, document checkers, and tracking</div>
+      <button class="card-btn">Learn more</button>
+    </div>
+
+    <div class="card card-3" id="c3">
+      <div class="card-title">TEMPLATES FOR EASE</div>
+      <div class="card-body">Navaro combines practical certification courses with shipping calculators, document checkers, and tracking</div>
+      <button class="card-btn">Learn More</button>
+    </div>
+
+  </div>
+</div>
+
+<div class="spacer"><p>Next section</p></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+  /*
+    VIEW 1 (start):
+      c1 (teal)   = center, scale 1, opacity 1, rotation 0
+      c2 (yellow) = right, ~70% visible, scale SIDE_SCALE, opacity SIDE_OPACITY, rotation +ROT
+      c3 (purple) = fully off-screen right, scale SIDE_SCALE, opacity SIDE_OPACITY, rotation +ROT
+
+    VIEW 2 (mid) — after pause 1:
+      c1 (teal)   = left, ~70% visible, scale SIDE_SCALE, opacity SIDE_OPACITY, rotation -ROT
+      c2 (yellow) = center, scale 1, opacity 1, rotation 0
+      c3 (purple) = right, ~70% visible, scale SIDE_SCALE, opacity SIDE_OPACITY, rotation +ROT
+
+    VIEW 3 (end) — after pause 2:
+      c1 (teal)   = fully off-screen left, scale SIDE_SCALE, opacity SIDE_OPACITY, rotation -ROT
+      c2 (yellow) = left, ~70% visible, scale SIDE_SCALE, opacity SIDE_OPACITY, rotation -ROT
+      c3 (purple) = center, scale 1, opacity 1, rotation 0
+  */
+
+  /*
+    Timeline structure (total length = 2 * (1 + PAUSE)):
+      [0          → 1         ]  MOVE  — beat 1: teal exits left, yellow centers, purple peeks right
+      [1          → 1 + PAUSE ]  PAUSE — yellow holds center, scroll burns
+      [1 + PAUSE  → 2 + PAUSE ]  MOVE  — beat 2: yellow exits left, purple centers, teal gone
+      [2 + PAUSE  → 2 + PAUSE*2] PAUSE — purple holds center, scroll burns
+
+    pin-wrap height = (TOTAL_DURATION + 1) * 100vh, set dynamically to always match.
+  */
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  /* ── tweakable values ── */
+  const PEEK         = 120;  /* xPercent shift for half-visible side card       */
+  const GONE         = 300;  /* xPercent shift for fully off-screen card        */
+  const ROT          = 10;   /* rotation degrees on peeking/exiting cards       */
+  const SCRUB        = 1;    /* scrub smoothness (number = lag, true = instant) */
+  const SIDE_SCALE   = 0.8;  /* scale of peeking side cards (center = 1)        */
+  const SIDE_OPACITY = 0.5;  /* opacity of peeking side cards (center = 1)      */
+  const PAUSE        = 0.2;  /* hold duration at each center position           */
+                             /* timeline unit: MOVE=1, PAUSE=0.2 per beat       */
+
+  /* ── set pin-wrap height based on timeline length ── */
+  const TOTAL_DURATION = 2 * (1 + PAUSE);
+  /* each timeline unit = 1 viewport height of scroll */
+  document.getElementById('pinWrap').style.height =
+    (TOTAL_DURATION + 1) * 100 + 'vh';
+
+  /* ── initial positions (view 1: teal center, yellow peeks right, purple gone) ── */
+  gsap.set("#c1", { xPercent: 0,     rotation: 0,    scale: 1,          opacity: 1,            zIndex: 3 });
+  gsap.set("#c2", { xPercent: PEEK,  rotation: ROT,  scale: SIDE_SCALE, opacity: SIDE_OPACITY,  zIndex: 2 });
+  gsap.set("#c3", { xPercent: GONE,  rotation: ROT,  scale: SIDE_SCALE, opacity: SIDE_OPACITY,  zIndex: 1 });
+
+  const tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: "#pinWrap",
+      start: "top top",
+      end: "bottom bottom",
+      scrub: SCRUB,
+      pin: "#stage",
+    }
+  });
+
+  /* ── beat 1: cards move → yellow centers ── */
+  tl
+    .to("#c1", { xPercent: -PEEK, rotation: -ROT, scale: SIDE_SCALE, opacity: SIDE_OPACITY, zIndex: 2, ease: "none", duration: 1 }, 0)
+    .to("#c2", { xPercent: 0,     rotation: 0,    scale: 1,          opacity: 1,            zIndex: 3, ease: "none", duration: 1 }, 0)
+    .to("#c3", { xPercent: PEEK,  rotation: ROT,  scale: SIDE_SCALE, opacity: SIDE_OPACITY, zIndex: 2, ease: "none", duration: 1 }, 0)
+
+  /* ── pause 1: yellow is centered, scroll burns here ── */
+  /* (empty label advances timeline time by PAUSE without animating anything) */
+    .addLabel("pause1", 1)
+    .addLabel("pause1end", 1 + PAUSE)
+
+  /* ── beat 2: cards move → purple centers ── */
+    .to("#c1", { xPercent: -GONE, rotation: -ROT, scale: SIDE_SCALE, opacity: SIDE_OPACITY, zIndex: 1, ease: "none", duration: 1 }, 1 + PAUSE)
+    .to("#c2", { xPercent: -PEEK, rotation: -ROT, scale: SIDE_SCALE, opacity: SIDE_OPACITY, zIndex: 2, ease: "none", duration: 1 }, 1 + PAUSE)
+    .to("#c3", { xPercent: 0,     rotation: 0,    scale: 1,          opacity: 1,            zIndex: 3, ease: "none", duration: 1 }, 1 + PAUSE)
+
+  /* ── pause 2: purple is centered, scroll burns here ── */
+    .addLabel("pause2",    2 + PAUSE)
+    .addLabel("pause2end", 2 + PAUSE * 2);
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+.div-100vh-2 {
+  height: 100vh;
+}
+
+.abs-bsn2 {
+  position: absolute;
+}
+
+.inset-0-bsn2 {
+  inset: 0;
+}
+
+.txt-1-bsn2 {
+  margin: 0;
+}
+
+.switcher-text-item {
+  opacity: 0;
+}
+
+.switcher-text-item._1 {
+  opacity: 1;
+}
