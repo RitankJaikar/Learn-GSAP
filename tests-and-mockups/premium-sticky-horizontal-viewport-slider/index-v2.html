@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="utf-8" />
+    <title>Swiper Demo</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1"
+    />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+      swiper-container {
+        width: 100%;
+        height: 100%;
+
+        /* Isse slider ek smooth, premium aur subtle tarike se slide hoga */
+        --swiper-wrapper-transition-timing-function: cubic-bezier(
+          0.25,
+          1,
+          0.5,
+          1
+        );
+      }
+
+      /* Moving all swiper-slide styles back to CSS block */
+      swiper-slide {
+        align-self: center;
+        height: 80vh !important;
+        border-radius: 12px;
+        text-align: center;
+        font-size: 18px;
+        width: max-content;
+      }
+
+      swiper-slide:nth-child(odd) {
+        background: linear-gradient(135deg, #1a1a1a, #222);
+        border: 1px solid #333;
+      }
+
+      swiper-slide:nth-child(even) {
+        background: linear-gradient(135deg, #111, #1e1e2f);
+        border: 1px solid #f03;
+      }
+
+      swiper-slide {
+        opacity: 0.4;
+        /* transform: scale(0.8); */
+        transition:
+          transform 0.5s ease-out,
+          opacity 0.5s ease-out;
+      }
+      swiper-slide.swiper-slide-active {
+        opacity: 1;
+        transform: scale(1);
+      }
+    </style>
+  </head>
+
+  <body
+    class="bg-black text-white font-sans m-0 p-0 overflow-x-hidden h-full relative"
+  >
+    <div class="h-screen flex justify-center items-center text-2xl">
+      Scroll Down
+    </div>
+
+    <div class="h-[400vh] relative swiperWrap">
+      <div class="h-screen sticky top-0 flex items-center overflow-hidden">
+        <swiper-container
+          class="mySwiper"
+          space-between="40"
+          slides-per-view="auto"
+          centered-slides="false"
+          grab-cursor="true"
+          speed="800"
+        >
+          <swiper-slide><div style="width: 80vw"></div></swiper-slide>
+          <swiper-slide><div style="width: 80vw"></div></swiper-slide>
+          <swiper-slide><div style="width: 80vw"></div></swiper-slide>
+          <swiper-slide><div style="width: 80vw"></div></swiper-slide>
+          <swiper-slide><div style="width: 80vw"></div></swiper-slide>
+        </swiper-container>
+      </div>
+    </div>
+
+    <div class="h-screen flex justify-center items-center text-2xl">
+      Footer Content
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@12/swiper-element-bundle.min.js"></script>
+
+    <script>
+      gsap.registerPlugin(ScrollTrigger);
+
+      const swiper = document.querySelector(
+        ".swiperWrap swiper-container",
+      ).swiper;
+      const totalSlides = swiper.slides.length;
+      let currentSlide = -1;
+
+      gsap.set(".swiperWrap", { height: `${totalSlides * 100}vh` });
+
+      ScrollTrigger.create({
+        trigger: ".swiperWrap",
+        start: "top top",
+        end: "bottom bottom",
+        markers: true,
+        onUpdate: (self) => {
+          const progress = self.progress;
+          const targetSlide = Math.min(
+            Math.floor(progress * totalSlides),
+            totalSlides - 1,
+          );
+
+          if (targetSlide !== currentSlide) {
+            swiper.slideTo(targetSlide);
+            currentSlide = targetSlide;
+          }
+        },
+      });
+    </script>
+  </body>
+</html>

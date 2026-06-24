@@ -50,7 +50,7 @@ gsap.set(".switcher-section", { height: `${totalStates * 100}vh` });
 
 // Instantly set initial state (all hidden)
 gsap.set(texts, { opacity: 0, y: 100 });
-gsap.set(lines, { x: "-100%" });
+gsap.set(lines, { x: "-102%" });
 
 /*
 Mentel Model to Remember-
@@ -97,7 +97,7 @@ function transition(targetIndex, direction) {
     switcherTimeline.to(
       prevLine,
       {
-        x: isForward ? "100%" : "-100%", // Slide off screen depending on direction
+        x: isForward ? "102%" : "-102%", // Slide off screen depending on direction
         duration: 0.45,
         ease: "power3.inOut",
         overwrite: "auto",

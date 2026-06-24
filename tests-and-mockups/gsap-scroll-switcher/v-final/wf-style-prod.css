@@ -1,17 +1,13 @@
+/* For Prod */
+
 .switcher-wrap {
   height: 100vh;
 }
 
-.abs-bsn2 {
+.abs-auto-bsn2 {
   position: absolute;
-}
-
-.inset-0-bsn2 {
   inset: 0;
-}
-
-.txt-1-bsn2 {
-  margin: 0;
+  height: auto;
 }
 
 .switcher-text-item {
